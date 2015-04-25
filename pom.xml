@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2015 For Goodness Sake, LLC
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.fgsake.hibernate</groupId>
+    <artifactId>hibernate-cache-couchbase</artifactId>
+    <packaging>jar</packaging>
+    <version>0.1.0-SNAPSHOT</version>
+
+    <description>Hibernate cache provider with storage in Couchbase</description>
+    <url>http://github.com/fgsake/hibernate-cache-couchbase</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <developers>
+        <developer>
+            <id>1</id>
+            <name>Steve McKay</name>
+            <email>steve@b.abbies.us</email>
+            <timezone>-5</timezone>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>http://github.com/fgsake/hibernate-cache-couchbase</url>
+        <connection>scm:git:https://github.com/fgsake/hibernate-cache-couchbase.git</connection>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>4.2.19.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>com.couchbase.client</groupId>
+            <artifactId>couchbase-client</artifactId>
+            <version>1.4.9</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>6</source>
+                    <target>6</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
