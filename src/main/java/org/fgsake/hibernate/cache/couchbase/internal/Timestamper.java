@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.fgsake.hibernate.cache.couchbase;
+package org.fgsake.hibernate.cache.couchbase.internal;
 
 /**
  * Timestamp source. Relies on {@link System#currentTimeMillis()} and

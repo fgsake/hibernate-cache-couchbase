@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.fgsake.hibernate.cache.couchbase;
+package org.fgsake.hibernate.cache.couchbase.internal;
 
 import java.io.*;
 import java.util.Comparator;

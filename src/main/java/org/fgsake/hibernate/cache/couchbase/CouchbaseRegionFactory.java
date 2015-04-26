@@ -16,53 +16,43 @@
 
 package org.fgsake.hibernate.cache.couchbase;
 
-import com.couchbase.client.CouchbaseClient;
+import org.fgsake.hibernate.cache.couchbase.internal.*;
 import org.hibernate.cache.CacheException;
 import org.hibernate.cache.spi.*;
 import org.hibernate.cache.spi.access.AccessType;
 import org.hibernate.cfg.Settings;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class CouchbaseRegionFactory implements RegionFactory {
     private static final Logger log = Logger.getLogger(CouchbaseRegionFactory.class);
 
-    public static final String CACHE_HOSTS_PROPERTY = "hibernate.cache.couchbase.hosts";
-    public static final String CACHE_BUCKET_PROPERTY = "hibernate.cache.couchbase.bucket";
-    public static final String CACHE_PASSWORD_PROPERTY = "hibernate.cache.couchbase.password";
+    public static final String CACHE_CLIENT_FACTORY_PROPERTY = "hibernate.cache.couchbase.client_factory_class";
     public static final String CACHE_DEFAULT_EXPIRY_PROPERTY = "hibernate.cache.couchbase.defaultExpiry";
 
     private ClientWrapper client;
     private int expiry;
 
     public void start(Settings settings, Properties props) throws CacheException {
-        String hosts = props.getProperty(CACHE_HOSTS_PROPERTY, "localhost");
-        String bucketName = props.getProperty(CACHE_BUCKET_PROPERTY, "cache");
-        String password = props.getProperty(CACHE_PASSWORD_PROPERTY, "");
+        String factoryClassName = props.getProperty(CACHE_CLIENT_FACTORY_PROPERTY, "org.fgsake.hibernate.cache.couchbase.internal.CouchbaseClientFactory");
+
+        MemcachedClientFactory factory;
+        try {
+            Class<?> factoryClass = Class.forName(factoryClassName);
+            factory = MemcachedClientFactory.class.cast(factoryClass.getConstructor().newInstance());
+        } catch (Exception e) {
+            throw new CacheException("Unable to instantiate client factory class " + factoryClassName);
+        }
+
         expiry = Integer.parseInt(props.getProperty(CACHE_DEFAULT_EXPIRY_PROPERTY, "3600"));
 
-        log.debugf("Starting with hosts: '%s' and bucket: %s", hosts, bucketName);
         try {
-            client = new ClientWrapper(new CouchbaseClient(bootstrapUris(hosts), bucketName, password));
-        } catch (IOException e) {
+            client = new ClientWrapper(factory.create(props));
+        } catch (Exception e) {
             throw new CacheException(e);
         }
-    }
-
-    private static List<URI> bootstrapUris(String hosts) {
-        List<URI> uris = new ArrayList<URI>();
-        for (String host : Arrays.asList(hosts.split("[, ]"))) {
-            String hostWithPort = host.contains(":") ? host : host + ":8091";
-            uris.add(URI.create("http://" + hostWithPort + "/pools"));
-        }
-        return uris;
     }
 
     public void stop() {

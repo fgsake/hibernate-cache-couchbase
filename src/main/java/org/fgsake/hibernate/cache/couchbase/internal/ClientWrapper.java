@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.fgsake.hibernate.cache.couchbase;
+package org.fgsake.hibernate.cache.couchbase.internal;
 
-import com.couchbase.client.CouchbaseClient;
 import net.spy.memcached.CASResponse;
 import net.spy.memcached.CASValue;
 import net.spy.memcached.MemcachedClient;
@@ -33,7 +32,7 @@ public class ClientWrapper {
 
     private final MemcachedClient client;
 
-    public ClientWrapper(CouchbaseClient client) {
+    public ClientWrapper(MemcachedClient client) {
         this.client = client;
     }
 

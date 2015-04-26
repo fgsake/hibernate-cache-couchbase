@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.fgsake.hibernate.cache.couchbase;
+package org.fgsake.hibernate.cache.couchbase.internal;
 
 import net.spy.memcached.CASResponse;
 import net.spy.memcached.CASValue;

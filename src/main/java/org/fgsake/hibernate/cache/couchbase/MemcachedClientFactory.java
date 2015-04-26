@@ -16,8 +16,10 @@
 
 package org.fgsake.hibernate.cache.couchbase;
 
-import java.util.Comparator;
+import net.spy.memcached.MemcachedClient;
 
-public interface CacheItem {
-    boolean writable(long txTimestamp, Object version, Comparator versionComparator);
+import java.util.Properties;
+
+public interface MemcachedClientFactory {
+    MemcachedClient create(Properties props) throws Exception;
 }
