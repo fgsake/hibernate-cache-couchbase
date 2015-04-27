@@ -45,7 +45,7 @@
     <scm>
         <url>http://github.com/fgsake/hibernate-cache-couchbase</url>
         <connection>scm:git:https://github.com/fgsake/hibernate-cache-couchbase.git</connection>
-        <developerConnection>scm:git:ssh://github.com/fgsake/hibernate-cache-couchbase.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/fgsake/hibernate-cache-couchbase.git</developerConnection>
     </scm>
 
     <properties>
