@@ -29,11 +29,24 @@ import java.util.concurrent.TimeUnit;
 public class CouchbaseRegionFactory implements RegionFactory {
     private static final Logger log = Logger.getLogger(CouchbaseRegionFactory.class);
 
+    /**
+     * Fully qualified name of a class that implements {@link MemcachedClientFactory}.
+     * It must have a public no-arg constructor. Default is {@link CouchbaseClientFactory}.
+     */
     public static final String CACHE_CLIENT_FACTORY_PROPERTY = "hibernate.cache.couchbase.client_factory_class";
-    public static final String CACHE_DEFAULT_EXPIRY_PROPERTY = "hibernate.cache.couchbase.defaultExpiry";
+    /**
+     * Default entry expiration time, in seconds. Default is 3600.
+     */
+    public static final String CACHE_DEFAULT_EXPIRY_PROPERTY = "hibernate.cache.couchbase.default_expiry";
+    /**
+     * Whether to automatically upgrade NONSTRICT_READ_WRITE regions to READ_WRITE.
+     * Default is false.
+     */
+    public static final String CACHE_IGNORE_NONSTRICT_PROPERTY = "hibernate.cache.couchbase.ignore_nonstrict";
 
     private ClientWrapper client;
     private int expiry;
+    private boolean ignoreNonstrict;
 
     public void start(Settings settings, Properties props) throws CacheException {
         String factoryClassName = props.getProperty(CACHE_CLIENT_FACTORY_PROPERTY, "org.fgsake.hibernate.cache.couchbase.internal.CouchbaseClientFactory");
@@ -47,6 +60,7 @@ public class CouchbaseRegionFactory implements RegionFactory {
         }
 
         expiry = Integer.parseInt(props.getProperty(CACHE_DEFAULT_EXPIRY_PROPERTY, "3600"));
+        ignoreNonstrict = Boolean.parseBoolean(props.getProperty(CACHE_IGNORE_NONSTRICT_PROPERTY, "false"));
 
         try {
             client = new ClientWrapper(factory.create(props));
@@ -74,17 +88,17 @@ public class CouchbaseRegionFactory implements RegionFactory {
 
     public EntityRegion buildEntityRegion(String regionName, Properties properties, CacheDataDescription metadata) throws CacheException {
         log.tracef("Building entity region %s", regionName);
-        return new CouchbaseEntityRegion(client, metadata, regionName, expiry);
+        return new CouchbaseEntityRegion(client, metadata, regionName, expiry, ignoreNonstrict);
     }
 
     public NaturalIdRegion buildNaturalIdRegion(String regionName, Properties properties, CacheDataDescription metadata) throws CacheException {
         log.tracef("Building natural ID region %s", regionName);
-        return new CouchbaseNaturalIdRegion(client, metadata, regionName, expiry);
+        return new CouchbaseNaturalIdRegion(client, metadata, regionName, expiry, ignoreNonstrict);
     }
 
     public CollectionRegion buildCollectionRegion(String regionName, Properties properties, CacheDataDescription metadata) throws CacheException {
         log.tracef("Building collection region %s", regionName);
-        return new CouchbaseCollectionRegion(client, metadata, regionName, expiry);
+        return new CouchbaseCollectionRegion(client, metadata, regionName, expiry, ignoreNonstrict);
     }
 
     public QueryResultsRegion buildQueryResultsRegion(String regionName, Properties properties) throws CacheException {

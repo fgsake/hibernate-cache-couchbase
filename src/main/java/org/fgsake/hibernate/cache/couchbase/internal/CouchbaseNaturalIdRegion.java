@@ -24,16 +24,12 @@ import org.hibernate.cache.spi.access.NaturalIdRegionAccessStrategy;
 import org.hibernate.cache.spi.access.SoftLock;
 
 public class CouchbaseNaturalIdRegion extends CouchbaseTransactionalDataRegion implements NaturalIdRegion {
-    public CouchbaseNaturalIdRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry) {
-        super(client, description, name, expiry);
+    public CouchbaseNaturalIdRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict) {
+        super(client, description, name, expiry, ignoreNonstrict);
     }
 
     public NaturalIdRegionAccessStrategy buildAccessStrategy(AccessType accessType) throws CacheException {
-        if (accessType == AccessType.TRANSACTIONAL) {
-            throw new CacheException("Access type " + accessType + " isn't supported");
-        }
-
-        return new AccessStrategy(accessType);
+        return new AccessStrategy(translateAccessType(accessType));
     }
 
     public class AccessStrategy extends CouchbaseTransactionalDataRegion.AccessStrategy implements NaturalIdRegionAccessStrategy {

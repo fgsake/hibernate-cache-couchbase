@@ -24,16 +24,12 @@ import org.hibernate.cache.spi.access.EntityRegionAccessStrategy;
 import org.hibernate.cache.spi.access.SoftLock;
 
 public class CouchbaseEntityRegion extends CouchbaseTransactionalDataRegion implements EntityRegion {
-    public CouchbaseEntityRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry) {
-        super(client, description, name, expiry);
+    public CouchbaseEntityRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict) {
+        super(client, description, name, expiry, ignoreNonstrict);
     }
 
     public EntityRegionAccessStrategy buildAccessStrategy(AccessType accessType) throws CacheException {
-        if (accessType == AccessType.TRANSACTIONAL) {
-            throw new CacheException("Access type " + accessType + " isn't supported");
-        }
-
-        return new AccessStrategy(accessType);
+        return new AccessStrategy(translateAccessType(accessType));
     }
 
     public class AccessStrategy extends CouchbaseTransactionalDataRegion.AccessStrategy implements EntityRegionAccessStrategy {

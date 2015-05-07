@@ -27,6 +27,10 @@ import org.jboss.logging.Logger;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Wrapper around {@link MemcachedClient}, wrapping exceptions in {@link CacheException}
+ * and enabling trace logging.
+ */
 public class ClientWrapper {
     private static final Logger log = Logger.getLogger(ClientWrapper.class);
 

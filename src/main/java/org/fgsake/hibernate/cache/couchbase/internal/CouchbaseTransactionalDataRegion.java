@@ -33,10 +33,12 @@ public class CouchbaseTransactionalDataRegion extends CouchbaseRegion implements
 
     protected final CacheDataDescription description;
     protected final Comparator versionComparator;
+    private final boolean ignoreNonstrict;
 
-    public CouchbaseTransactionalDataRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry) {
+    public CouchbaseTransactionalDataRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict) {
         super(client, name, expiry);
         this.description = description;
+        this.ignoreNonstrict = ignoreNonstrict;
         this.versionComparator = description.getVersionComparator();
     }
 
@@ -46,6 +48,15 @@ public class CouchbaseTransactionalDataRegion extends CouchbaseRegion implements
 
     public CacheDataDescription getCacheDataDescription() {
         return description;
+    }
+
+    protected AccessType translateAccessType(AccessType accessType) {
+        if (accessType == AccessType.TRANSACTIONAL) {
+            throw new CacheException("Access type " + accessType + " isn't supported");
+        } else if (accessType == AccessType.NONSTRICT_READ_WRITE && ignoreNonstrict) {
+            return AccessType.READ_WRITE;
+        }
+        return accessType;
     }
 
     public class AccessStrategy implements RegionAccessStrategy {

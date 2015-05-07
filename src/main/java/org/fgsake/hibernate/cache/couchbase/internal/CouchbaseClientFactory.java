@@ -30,8 +30,20 @@ import java.util.Properties;
 public class CouchbaseClientFactory implements MemcachedClientFactory {
     private static final Logger log = Logger.getLogger(CouchbaseClientFactory.class);
 
+    /**
+     * A comma-separated string of hosts to bootstrap the client. For each host,
+     * the port defaults to 8091 if not specified. Default is localhost.
+     * <p>
+     * NOTE: Only <code>host:port</code> is required. Using a URL won't work.
+     */
     public static final String CACHE_HOSTS_PROPERTY = "hibernate.cache.couchbase.hosts";
+    /**
+     * The Couchbase bucket to use. Default is cache.
+     */
     public static final String CACHE_BUCKET_PROPERTY = "hibernate.cache.couchbase.bucket";
+    /**
+     * The bucket password. Default is the empty string.
+     */
     public static final String CACHE_PASSWORD_PROPERTY = "hibernate.cache.couchbase.password";
 
     public MemcachedClient create(Properties props) throws Exception {

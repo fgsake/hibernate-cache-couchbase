@@ -23,15 +23,12 @@ import org.hibernate.cache.spi.access.AccessType;
 import org.hibernate.cache.spi.access.CollectionRegionAccessStrategy;
 
 public class CouchbaseCollectionRegion extends CouchbaseTransactionalDataRegion implements CollectionRegion {
-    public CouchbaseCollectionRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry) {
-        super(client, description, name, expiry);
+    public CouchbaseCollectionRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict) {
+        super(client, description, name, expiry, ignoreNonstrict);
     }
 
     public CollectionRegionAccessStrategy buildAccessStrategy(AccessType accessType) throws CacheException {
-        if (accessType == AccessType.TRANSACTIONAL) {
-            throw new CacheException("Access type " + accessType + " isn't supported");
-        }
-        return new AccessStrategy(accessType);
+        return new AccessStrategy(translateAccessType(accessType));
     }
 
     public class AccessStrategy extends CouchbaseTransactionalDataRegion.AccessStrategy implements CollectionRegionAccessStrategy {
