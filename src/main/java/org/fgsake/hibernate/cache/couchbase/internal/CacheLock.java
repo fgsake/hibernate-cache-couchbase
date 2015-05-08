@@ -71,6 +71,7 @@ public final class CacheLock implements CacheItem, Externalizable {
         out.writeInt(count);
         out.writeBoolean(concurrent);
         out.writeLong(unlockTimestamp);
+        out.writeLong(timeout);
         out.writeObject(version);
     }
 
@@ -82,6 +83,7 @@ public final class CacheLock implements CacheItem, Externalizable {
         count = in.readInt();
         concurrent = in.readBoolean();
         unlockTimestamp = in.readLong();
+        timeout = in.readLong();
         this.version = in.readObject();
     }
 
