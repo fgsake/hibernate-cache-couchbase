@@ -24,8 +24,8 @@ import org.hibernate.cache.spi.access.NaturalIdRegionAccessStrategy;
 import org.hibernate.cache.spi.access.SoftLock;
 
 public class CouchbaseNaturalIdRegion extends CouchbaseTransactionalDataRegion implements NaturalIdRegion {
-    public CouchbaseNaturalIdRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict) {
-        super(client, description, name, expiry, ignoreNonstrict);
+    public CouchbaseNaturalIdRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict, int schemaVersion) {
+        super(client, description, name, expiry, ignoreNonstrict, schemaVersion);
     }
 
     public NaturalIdRegionAccessStrategy buildAccessStrategy(AccessType accessType) throws CacheException {

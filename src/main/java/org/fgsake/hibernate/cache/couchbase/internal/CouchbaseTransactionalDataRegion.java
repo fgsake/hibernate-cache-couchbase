@@ -33,12 +33,14 @@ public class CouchbaseTransactionalDataRegion extends CouchbaseRegion implements
 
     protected final CacheDataDescription description;
     protected final Comparator versionComparator;
+    protected final int schemaVersion;
     private final boolean ignoreNonstrict;
 
-    public CouchbaseTransactionalDataRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict) {
+    public CouchbaseTransactionalDataRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict, int schemaVersion) {
         super(client, name, expiry);
         this.description = description;
         this.ignoreNonstrict = ignoreNonstrict;
+        this.schemaVersion = schemaVersion;
         this.versionComparator = description.getVersionComparator();
     }
 
@@ -73,7 +75,7 @@ public class CouchbaseTransactionalDataRegion extends CouchbaseRegion implements
 
             if (value instanceof CacheData) {
                 CacheData data = (CacheData) value;
-                if (data.getTimestamp() > txTimestamp) {
+                if (data.getTimestamp() > txTimestamp || data.getSchemaVersion() != schemaVersion) {
                     return null;
                 }
                 return data.getValue();
@@ -91,13 +93,13 @@ public class CouchbaseTransactionalDataRegion extends CouchbaseRegion implements
 
             CASValue<Object> rsp = client.gets(keyStr);
             if (rsp == null) {
-                client.add(keyStr, expiry, new CacheData(txTimestamp, version, value));
+                client.add(keyStr, expiry, new CacheData(txTimestamp, version, value, schemaVersion));
                 return true;
             }
 
             Object v = rsp.getValue();
-            if (v instanceof CacheItem && ((CacheItem) v).writable(txTimestamp, version, versionComparator)) {
-                client.asyncCAS(keyStr, rsp.getCas(), expiry, new CacheData(txTimestamp, version, value));
+            if (v instanceof CacheItem && ((CacheItem) v).writable(txTimestamp, version, versionComparator, schemaVersion)) {
+                client.asyncCAS(keyStr, rsp.getCas(), expiry, new CacheData(txTimestamp, version, value, schemaVersion));
                 return true;
             }
             return false;
@@ -116,7 +118,7 @@ public class CouchbaseTransactionalDataRegion extends CouchbaseRegion implements
             while (true) {
                 CASValue<Object> rsp = client.gets(keyStr);
                 if (rsp == null) {
-                    if (client.add(keyStr, 0, new CacheLock(version, nextTimestamp() + getTimeout())).getStatus().isSuccess()) {
+                    if (client.add(keyStr, 0, new CacheLock(version, nextTimestamp() + getTimeout(), schemaVersion)).getStatus().isSuccess()) {
                         return null;
                     }
                     continue;
@@ -126,14 +128,14 @@ public class CouchbaseTransactionalDataRegion extends CouchbaseRegion implements
                 if (item instanceof CacheLock) {
                     ((CacheLock) item).lock(nextTimestamp() + getTimeout());
                 } else {
-                    item = new CacheLock(version, nextTimestamp() + getTimeout());
+                    item = new CacheLock(version, nextTimestamp() + getTimeout(), schemaVersion);
                 }
 
                 switch (client.cas(keyStr, rsp.getCas(), 0, item)) {
                 case OK:
                     return null;
                 case NOT_FOUND:
-                    if (client.add(keyStr, 0, new CacheLock(version, nextTimestamp() + getTimeout())).getStatus().isSuccess()) {
+                    if (client.add(keyStr, 0, new CacheLock(version, nextTimestamp() + getTimeout(), schemaVersion)).getStatus().isSuccess()) {
                         return null;
                     }
                     break;
@@ -202,7 +204,7 @@ public class CouchbaseTransactionalDataRegion extends CouchbaseRegion implements
         protected boolean afterInsert(Object key, Object value, Object version) throws CacheException {
             String keyStr = keyStrFor(key);
             log.debugf("Insert %s", keyStr);
-            client.add(keyStr, expiry, new CacheData(nextTimestamp(), version, value));
+            client.add(keyStr, expiry, new CacheData(nextTimestamp(), version, value, schemaVersion));
             return true;
         }
 
@@ -213,7 +215,7 @@ public class CouchbaseTransactionalDataRegion extends CouchbaseRegion implements
             if (accessType == AccessType.READ_ONLY) {
                 throw new UnsupportedOperationException("Can't write to a readonly object");
             } else if (accessType == AccessType.NONSTRICT_READ_WRITE) {
-                client.set(keyStr, expiry, new CacheData(0, version, value));
+                client.set(keyStr, expiry, new CacheData(0, version, value, schemaVersion));
             }
 
             while (true) {
@@ -226,7 +228,7 @@ public class CouchbaseTransactionalDataRegion extends CouchbaseRegion implements
                 if (item instanceof CacheLock) {
                     CacheLock lock = (CacheLock) item;
                     if (lock.unlock(nextTimestamp())) {
-                        if (client.cas(keyStr, rsp.getCas(), expiry, new CacheData(nextTimestamp(), version, value)) == CASResponse.OK) {
+                        if (client.cas(keyStr, rsp.getCas(), expiry, new CacheData(nextTimestamp(), version, value, schemaVersion)) == CASResponse.OK) {
                             return true;
                         }
                     } else if (client.cas(keyStr, rsp.getCas(), 0, lock) == CASResponse.OK) {

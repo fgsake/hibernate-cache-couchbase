@@ -19,5 +19,5 @@ package org.fgsake.hibernate.cache.couchbase.internal;
 import java.util.Comparator;
 
 public interface CacheItem {
-    boolean writable(long txTimestamp, Object version, Comparator versionComparator);
+    boolean writable(long txTimestamp, Object version, Comparator versionComparator, int schemaVersion);
 }

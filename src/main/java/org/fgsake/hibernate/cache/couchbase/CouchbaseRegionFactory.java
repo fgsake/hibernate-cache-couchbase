@@ -44,11 +44,16 @@ public class CouchbaseRegionFactory implements RegionFactory {
      */
     public static final String CACHE_IGNORE_NONSTRICT_PROPERTY = "hibernate.cache.couchbase.ignore_nonstrict";
 
+    public static final String CACHE_SCHEMA_VERSION_PROPERTY = "hibernate.cache.couchbase.schema_version";
+
     private ClientWrapper client;
     private int expiry;
     private boolean ignoreNonstrict;
+    private int schemaVersion;
 
     public void start(Settings settings, Properties props) throws CacheException {
+        schemaVersion = Integer.parseInt(props.getProperty(CACHE_SCHEMA_VERSION_PROPERTY, "-1"));
+
         String factoryClassName = props.getProperty(CACHE_CLIENT_FACTORY_PROPERTY, "org.fgsake.hibernate.cache.couchbase.internal.CouchbaseClientFactory");
 
         MemcachedClientFactory factory;
@@ -88,17 +93,17 @@ public class CouchbaseRegionFactory implements RegionFactory {
 
     public EntityRegion buildEntityRegion(String regionName, Properties properties, CacheDataDescription metadata) throws CacheException {
         log.tracef("Building entity region %s", regionName);
-        return new CouchbaseEntityRegion(client, metadata, regionName, expiry, ignoreNonstrict);
+        return new CouchbaseEntityRegion(client, metadata, regionName, expiry, ignoreNonstrict, schemaVersion);
     }
 
     public NaturalIdRegion buildNaturalIdRegion(String regionName, Properties properties, CacheDataDescription metadata) throws CacheException {
         log.tracef("Building natural ID region %s", regionName);
-        return new CouchbaseNaturalIdRegion(client, metadata, regionName, expiry, ignoreNonstrict);
+        return new CouchbaseNaturalIdRegion(client, metadata, regionName, expiry, ignoreNonstrict, schemaVersion);
     }
 
     public CollectionRegion buildCollectionRegion(String regionName, Properties properties, CacheDataDescription metadata) throws CacheException {
         log.tracef("Building collection region %s", regionName);
-        return new CouchbaseCollectionRegion(client, metadata, regionName, expiry, ignoreNonstrict);
+        return new CouchbaseCollectionRegion(client, metadata, regionName, expiry, ignoreNonstrict, schemaVersion);
     }
 
     public QueryResultsRegion buildQueryResultsRegion(String regionName, Properties properties) throws CacheException {

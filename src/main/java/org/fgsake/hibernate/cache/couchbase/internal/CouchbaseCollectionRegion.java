@@ -23,8 +23,8 @@ import org.hibernate.cache.spi.access.AccessType;
 import org.hibernate.cache.spi.access.CollectionRegionAccessStrategy;
 
 public class CouchbaseCollectionRegion extends CouchbaseTransactionalDataRegion implements CollectionRegion {
-    public CouchbaseCollectionRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict) {
-        super(client, description, name, expiry, ignoreNonstrict);
+    public CouchbaseCollectionRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict, int schemaVersion) {
+        super(client, description, name, expiry, ignoreNonstrict, schemaVersion);
     }
 
     public CollectionRegionAccessStrategy buildAccessStrategy(AccessType accessType) throws CacheException {

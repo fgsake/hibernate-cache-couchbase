@@ -24,8 +24,8 @@ import org.hibernate.cache.spi.access.EntityRegionAccessStrategy;
 import org.hibernate.cache.spi.access.SoftLock;
 
 public class CouchbaseEntityRegion extends CouchbaseTransactionalDataRegion implements EntityRegion {
-    public CouchbaseEntityRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict) {
-        super(client, description, name, expiry, ignoreNonstrict);
+    public CouchbaseEntityRegion(ClientWrapper client, CacheDataDescription description, String name, int expiry, boolean ignoreNonstrict, int schemaVersion) {
+        super(client, description, name, expiry, ignoreNonstrict, schemaVersion);
     }
 
     public EntityRegionAccessStrategy buildAccessStrategy(AccessType accessType) throws CacheException {

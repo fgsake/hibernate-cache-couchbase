@@ -23,35 +23,48 @@ public final class CacheData implements Externalizable, CacheItem {
     private long timestamp;
     private Object version;
     private Object value;
+    private int schemaVersion;
 
-    public CacheData() {}
+    public CacheData() {
+    }
 
-    public CacheData(long timestamp, Object version, Object value) {
+    public CacheData(long timestamp, Object version, Object value, int schemaVersion) {
         this.timestamp = timestamp;
         this.version = version;
         this.value = value;
+        this.schemaVersion = schemaVersion;
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeByte(1); // format version
+        out.writeByte(2); // format version
         out.writeLong(timestamp);
         out.writeObject(version);
         out.writeObject(value);
+        out.writeInt(schemaVersion);
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         byte version = in.readByte();
-        if (version != 1) {
-            throw new InvalidObjectException("Unrecognized version: " + version);
+        switch (version) {
+            case 1:
+                timestamp = in.readLong();
+                this.version = in.readObject();
+                value = in.readObject();
+                schemaVersion = Integer.MIN_VALUE;
+                break;
+            case 2:
+                timestamp = in.readLong();
+                this.version = in.readObject();
+                value = in.readObject();
+                schemaVersion = in.readInt();
+                break;
+            default:
+                throw new InvalidObjectException("Unrecognized version: " + version);
         }
-
-        timestamp = in.readLong();
-        this.version = in.readObject();
-        value = in.readObject();
     }
 
-    public boolean writable(long txTimestamp, Object version, Comparator versionComparator) {
-        return this.version != null && versionComparator.compare(this.version, version) < 0;
+    public boolean writable(long txTimestamp, Object version, Comparator versionComparator, int schemaVersion) {
+        return this.version != null && versionComparator.compare(this.version, version) < 0 || schemaVersion > this.schemaVersion;
     }
 
     public long getTimestamp() {
@@ -60,6 +73,10 @@ public final class CacheData implements Externalizable, CacheItem {
 
     public Object getValue() {
         return value;
+    }
+
+    public int getSchemaVersion() {
+        return schemaVersion;
     }
 
     @Override

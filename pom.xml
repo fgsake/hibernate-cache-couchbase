@@ -20,7 +20,7 @@
     <groupId>org.fgsake.hibernate</groupId>
     <artifactId>hibernate-cache-couchbase</artifactId>
     <packaging>jar</packaging>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Hibernate cache provider with storage in Couchbase</description>

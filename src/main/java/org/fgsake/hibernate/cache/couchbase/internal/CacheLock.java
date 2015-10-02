@@ -24,20 +24,24 @@ public final class CacheLock implements CacheItem, Externalizable {
     private boolean concurrent;
     private long unlockTimestamp;
     private long timeout;
+    private int schemaVersion;
     private Object version;
 
     public CacheLock() {}
 
-    public CacheLock(Object version, long timeout) {
+    public CacheLock(Object version, long timeout, int schemaVersion) {
         count = 1;
         concurrent = false;
         unlockTimestamp = Long.MAX_VALUE;
         this.timeout = timeout;
+        this.schemaVersion = schemaVersion;
         this.version = version;
     }
 
-    public boolean writable(long txTimestamp, Object version, Comparator versionComparator) {
-        if (txTimestamp > timeout) {
+    public boolean writable(long txTimestamp, Object version, Comparator versionComparator, int schemaVersion) {
+        if (this.schemaVersion > schemaVersion) {
+            return false;
+        } else if (txTimestamp > timeout) {
             return true;
         } else if (count > 0) {
             return false;
@@ -67,24 +71,37 @@ public final class CacheLock implements CacheItem, Externalizable {
     }
 
     public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeByte(1);
+        out.writeByte(2);
         out.writeInt(count);
         out.writeBoolean(concurrent);
         out.writeLong(unlockTimestamp);
         out.writeLong(timeout);
         out.writeObject(version);
+        out.writeInt(schemaVersion);
     }
 
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         byte version = in.readByte();
-        if (version != 1) {
-            throw new InvalidObjectException("Unsupported format version " + version);
+        switch (version) {
+            case 1:
+                count = in.readInt();
+                concurrent = in.readBoolean();
+                unlockTimestamp = in.readLong();
+                timeout = in.readLong();
+                this.version = in.readObject();
+                schemaVersion = Integer.MIN_VALUE;
+                break;
+            case 2:
+                count = in.readInt();
+                concurrent = in.readBoolean();
+                unlockTimestamp = in.readLong();
+                timeout = in.readLong();
+                this.version = in.readObject();
+                schemaVersion = in.readInt();
+                break;
+            default:
+                throw new InvalidObjectException("Unsupported format version " + version);
         }
-        count = in.readInt();
-        concurrent = in.readBoolean();
-        unlockTimestamp = in.readLong();
-        timeout = in.readLong();
-        this.version = in.readObject();
     }
 
     @Override
