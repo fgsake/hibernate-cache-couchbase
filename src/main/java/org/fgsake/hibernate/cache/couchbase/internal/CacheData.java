@@ -59,7 +59,11 @@ public final class CacheData implements Externalizable, CacheItem {
                 schemaVersion = in.readInt();
                 break;
             default:
-                throw new InvalidObjectException("Unrecognized version: " + version);
+                timestamp = in.readLong();
+                this.version = in.readObject();
+                value = in.readObject();
+                schemaVersion = in.readInt();
+                break;
         }
     }
 

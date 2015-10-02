@@ -100,7 +100,13 @@ public final class CacheLock implements CacheItem, Externalizable {
                 schemaVersion = in.readInt();
                 break;
             default:
-                throw new InvalidObjectException("Unsupported format version " + version);
+                count = in.readInt();
+                concurrent = in.readBoolean();
+                unlockTimestamp = in.readLong();
+                timeout = in.readLong();
+                this.version = in.readObject();
+                schemaVersion = in.readInt();
+                break;
         }
     }
 
